@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  first_name String
+  last_name  String
+  phone_no   String?  @unique
+  email      String   @unique
+  address    String?
+  age        Int
+  gender     Gender
+  height     Int?
+  weight     Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  batch    Batch?  @relation(fields: [batch_id], references: [id])
+  batch_id String? 
+
+  payment        Payment?
+  payment_status Boolean  @default(false)
+
+  @@index([email], name: "email")
+}
+
+model Batch {
+  id                     String   @id @default(uuid())
+  startTime              Int
+  endTime                Int
+  price                  Float
+  batch_capacity_max     Int
+  batch_capacity_current Int
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  users                  User[]
+}
+
+model Payment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime? 
+  price     Float
+  isActive  Boolean?
+  batch_id  String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
